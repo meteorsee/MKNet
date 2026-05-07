@@ -1,0 +1,10 @@
+Model,Image Size,Params (M),mAP@0.5 (%),mAP@0.5:0.95 (%),GFLOPs
+Light-YOLO,640x640,2.2,37.1,23.8,--
+CoalMineIoVT,640x544,8.1,43.5,--,17.2
+ECF-YOLOv7-tiny,416x416,7.63,56.3,38.2,10.3
+ECF-YOLOv7-tiny,640x640,7.63,60.8,42.5,24.5
+ECF-YOLOv7-tiny + Proposed Methods,416x416,6.39,54.3,37,18.4
+ECF-YOLOv7-tiny + Proposed Methods,640x640,6.39,59,40.8,18.4
+ECF-YOLOv7-tiny + Proposed Methods,768x768,6.39,60,41.6,18.4
+YOLOv8n,640x640,3.2,--,37.3,8.7
+MKNet (proposed architecture),640x640,1.99,46.9,31.6,7.8

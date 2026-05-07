@@ -1,0 +1,55 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+# MobileNetV3 + CSPCAM_MBV3 + CSE in head
+# Trimmed pyramid backbone (P2/4 - P4/16), Detect on P3/8 and P4/16
+
+nc: 80  # number of classes
+scales:
+  n: [0.33, 0.25, 1024]
+
+nc: 80  # number of classes
+scales:
+  n: [0.33, 0.25, 1024]
+
+backbone:
+  # --- Stem ---
+  - [-1, 1, SpaceToDepthStem_DW, [16, 2]]                        # 0: P1/2
+  - [-1, 1, MobileNetV3_InvertedResidual, [16, 16, 3, 1, 0, 0]]
+
+  - [-1, 1, MobileNetV3_InvertedResidual, [24, 64, 3, 2, 0, 0]]  # 2-P2/4
+  - [-1, 1, MobileNetV3_InvertedResidual, [24, 72, 3, 1, 0, 0]]
+
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 72, 5, 2, 1, 0]]  # 4-P3/8
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 120, 5, 1, 1, 0]]
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 120, 5, 1, 1, 0]]
+
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 240, 3, 2, 0, 1]]  # 7-P4/16
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 200, 3, 1, 0, 1]]
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 184, 3, 1, 0, 1]]
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 184, 3, 1, 0, 1]]
+  - [-1, 1, MobileNetV3_InvertedResidual, [112, 480, 3, 1, 1, 1]]
+  - [-1, 1, MobileNetV3_InvertedResidual, [112, 672, 3, 1, 1, 1]]
+  # --- P5/32 (lite, context only) ---
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 320, 5, 2, 1, 1]] # 13: P5/32
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 384, 5, 1, 1, 1]] # 14
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 384, 5, 1, 1, 1]] # 15: P5
+
+# YOLOv8.0n head
+head:
+  # --- Top-down: P5 -> P4 ---
+  - [15, 1, nn.Upsample, [None, 2, 'nearest']]              # 16
+  - [[12, 16], 1, Concat, [1]]                              # 17
+  - [-1, 1, VoVGSCSP, [512, 2, 0.5]]                        # 18
+
+  # --- Top-down: P4' -> P3 ---
+  - [18, 1, nn.Upsample, [None, 2, 'nearest']]              # 19
+  - [[6, 19], 1, Concat, [1]]                               # 20
+  - [-1, 1, VoVGSCSP, [256, 2, 0.5]]                        # 21
+
+  # --- Bottom-up PAN: P3 -> P4 ---
+  - [21, 1, GSConv, [256, 3, 2]]                            # 22
+  - [[22, 18], 1, Concat, [1]]                              # 23
+  - [-1, 1, VoVGSCSP, [512, 2, 0.5]]                        # 24
+
+  # --- Detect (P3, P4) ---
+  - [[21, 24], 1, Detect, [nc]]                             # 25

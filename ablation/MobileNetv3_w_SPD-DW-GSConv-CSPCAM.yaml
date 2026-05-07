@@ -1,0 +1,50 @@
+nc: 80  # number of classes
+scales:
+  n: [0.33, 0.25, 1024]
+
+backbone:
+  # --- Stem ---
+  - [-1, 1, SpaceToDepthStem_DW, [16, 2]]                        # 0: P1/2
+  - [-1, 1, MobileNetV3_InvertedResidual, [16, 16, 3, 1, 0, 0]]  # 1
+
+  # --- P2/4 stage ---
+  - [-1, 1, MobileNetV3_InvertedResidual, [24, 64, 3, 2, 0, 0]]  # 2: P2/4
+  - [-1, 1, MobileNetV3_InvertedResidual, [24, 72, 3, 1, 0, 0]]  # 3: P2 refine (原来的 layer4)
+
+  # --- P3/8 stage ---
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 72, 5, 2, 0, 0]]  # 4: P3/8 (downsample)
+  - [-1, 1, CSPCAM_MBV3, [16, 1, 1]]                              # 5: (搬到 P3) multi-scale context
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 120, 5, 1, 0, 0]] # 6: P3 refine (no SE)
+  - [-1, 1, MobileNetV3_InvertedResidual, [40, 120, 5, 1, 1, 0]] # 7: P3 tail  (SE on)  <-- P3
+
+  # --- P4/16 stage ---
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 240, 3, 2, 0, 1]]  # 8: P4/16
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 200, 3, 1, 0, 1]]  # 9
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 184, 3, 1, 0, 1]]  # 10
+  - [-1, 1, MobileNetV3_InvertedResidual, [80, 184, 3, 1, 0, 1]]  # 11
+  - [-1, 1, MobileNetV3_InvertedResidual, [112, 480, 3, 1, 1, 1]] # 12
+  - [-1, 1, MobileNetV3_InvertedResidual, [112, 672, 3, 1, 1, 1]] # 13: P4  <-- P4
+
+  # --- P5/32 (context only) ---
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 320, 5, 2, 0, 1]] # 14: P5/32 (建议先把 SE 关掉)
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 384, 5, 1, 0, 1]] # 15
+  - [-1, 1, MobileNetV3_InvertedResidual, [160, 384, 5, 1, 1, 1]] # 16: P5 tail (SE on)  <-- P5
+
+head:
+  # --- Top-down: P5 -> P4 ---
+  - [16, 1, nn.Upsample, [None, 2, 'nearest']]              # 17: P5 -> P4_up
+  - [[13, 17], 1, Concat, [1]]                              # 18: fuse P4 + P5_up
+  - [-1, 1, VoVGSCSP, [512, 2, 0.5]]                        # 19: P4_td (n=2, e=0.5)
+
+  # --- Top-down: P4' -> P3 ---
+  - [19, 1, nn.Upsample, [None, 2, 'nearest']]              # 20: P4_td -> P3_up
+  - [[7, 20], 1, Concat, [1]]                               # 21: fuse P3 + P4'_up
+  - [-1, 1, VoVGSCSP, [256, 2, 0.5]]                        # 22: P3_td
+
+  # --- Bottom-up PAN: P3 -> P4 ---
+  - [22, 1, GSConv, [256, 3, 2]]                            # 23: downsample with GSConv
+  - [[23, 19], 1, Concat, [1]]                              # 24: fuse P4_down + P4_td
+  - [-1, 1, VoVGSCSP, [512, 2, 0.5]]                        # 25: P4_pan
+
+  # --- Detect (P3, P4) ---
+  - [[22, 25], 1, Detect, [nc]]                             # 26: Detect(P3, P4)
