@@ -12,6 +12,26 @@ MKNet is a lightweight YOLO-based object detection architecture designed for rea
 - A GSConv-based neck for efficient multi-scale feature fusion.
 - A real-time object detection design suitable for assistive vision and resource-constrained deployment scenarios.
 
+## Results
+
+### Model Comparison
+
+| Model            | Params (M) | GFLOPs | mAP@0.5 | mAP@0.5:0.95 |
+| ---------------- | ---------: | -----: | ------: | -----------: |
+| YOLOv8n Baseline |          3.2 |      8.7 |       - |            37.3 |
+| MKNet            |          1.99 |      7.8 |       46.9 |            31.6 |
+
+### Ablation Study
+
+| Variant              | MBV3 | SPD-DW | AKMixDW-Partial SC | GSConv | CSPCAM_MBV3 | Params (M) | GFLOPs | mAP@0.5 | mAP@0.5:0.95 |
+| -------------------- | ---- | ------ | ----------- | ------------------ | ------ | ---------: | -----: | ------: | -----------: |
+| YOLOv8n Baseline     |      |        |             |                    |        |          3.2 |      8.7 |       - |            37.3 |
+| + MBV3               | ✓    |        |             |                    |        |          1.69 |      25.5 |       38.1 |            23.7 |
+| + SPD-DW             | ✓    | ✓      |            |                    |        |          1.69 |      6.8 |       43.9 |            29.3 |
+| + AKMixDW-Partial SC | ✓    | ✓      | ✓           |                   |        |          2.18 |      8.1 |       47.3 |            32 |
+| + GSConv Neck        | ✓    | ✓      | ✓           | ✓                  |       |          2.12 |      7.9 |       47.2 |            31.8 |
+| + CSPCAM_MBV3        | ✓    | ✓      | ✓           | ✓                  | ✓       |          1.99 |      7.8 |       46.9 |            31.6 |
+
 ## Architecture
 
 <img width="2914" height="3644" alt="proposed structure" src="https://github.com/user-attachments/assets/c471385d-4847-4d80-bd83-fa613d0b20c8" />
@@ -224,26 +244,6 @@ python scripts/predict.py \
   --weights weights/mknet.pt \
   --source assets/demo_images/
 ```
-
-## Results
-
-### Model Comparison
-
-| Model            | Params (M) | GFLOPs | mAP@0.5 | mAP@0.5:0.95 |
-| ---------------- | ---------: | -----: | ------: | -----------: |
-| YOLOv8n Baseline |          3.2 |      8.7 |       - |            37.3 |
-| MKNet            |          1.99 |      7.8 |       46.9 |            31.6 |
-
-### Ablation Study
-
-| Variant              | MBV3 | SPD-DW | AKMixDW-Partial SC | GSConv | CSPCAM_MBV3 | Params (M) | GFLOPs | mAP@0.5 | mAP@0.5:0.95 |
-| -------------------- | ---- | ------ | ----------- | ------------------ | ------ | ---------: | -----: | ------: | -----------: |
-| YOLOv8n Baseline     |      |        |             |                    |        |          3.2 |      8.7 |       - |            37.3 |
-| + MBV3               | ✓    |        |             |                    |        |          1.69 |      25.5 |       38.1 |            23.7 |
-| + SPD-DW             | ✓    | ✓      |            |                    |        |          1.69 |      6.8 |       43.9 |            29.3 |
-| + AKMixDW-Partial SC | ✓    | ✓      | ✓           |                   |        |          2.18 |      8.1 |       47.3 |            32 |
-| + GSConv Neck        | ✓    | ✓      | ✓           | ✓                  |       |          2.12 |      7.9 |       47.2 |            31.8 |
-| + CSPCAM_MBV3        | ✓    | ✓      | ✓           | ✓                  | ✓       |          1.99 |      7.8 |       46.9 |            31.6 |
 
 ## Pretrained Weights
 
