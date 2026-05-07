@@ -272,11 +272,32 @@ If you use this work in your research, please cite:
 
 This work is developed based on the YOLO object detection framework and follows the Ultralytics training and deployment workflow. We also acknowledge the MS COCO dataset and related lightweight object detection studies that inspired the design of MKNet.
 
+```bibtex
+@misc{ultralytics2023yolov8,
+  title  = {YOLOv8},
+  author = {{Ultralytics}},
+  year   = {2023},
+  url    = {https://docs.ultralytics.com/models/yolov8/}
+}
+
+@article{howard2019mobilenetv3,
+  title   = {Searching for MobileNetV3},
+  author  = {Howard, Andrew and Sandler, Mark and Chu, Grace and Chen, Liang-Chieh and others},
+  journal = {arXiv preprint arXiv:1905.02244},
+  year    = {2019},
+  url     = {https://arxiv.org/abs/1905.02244}
+}
+
+@article{lin2014coco,
+  title   = {Microsoft COCO: Common Objects in Context},
+  author  = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and others},
+  journal = {arXiv preprint arXiv:1405.0312},
+  year    = {2014},
+  doi     = {10.48550/arXiv.1405.0312}
+}
+```
+
+
 ## License
 
-This project is released under the selected license. Please refer to the `LICENSE` file for more details.
-
-```
-
-One important suggestion: since your title is **“Adaptive Kernel Mixing Depthwise Convolution for Lightweight Object Detection”**, your README should make **AKMixDW** look like the main contribution, while MBV3, SPD-DW, CSPCAM, and GSConv are supporting architectural components. This makes the novelty clearer.
-```
+This project is released under the GNU Affero General Public License v3.0. Please refer to the `LICENSE` file for more details.
