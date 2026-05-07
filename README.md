@@ -166,13 +166,7 @@ yolo detect train model=configs/mknet-small.yaml data=configs/dataset.yaml imgsz
 ### Option 2: Train with custom setup
 
 ```bash
-python scripts/train.py \
-  --model configs/mknet.yaml \
-  --data configs/dataset.yaml \
-  --imgsz 640 \
-  --epochs 300 \
-  --batch 32 \
-  --device 0
+python scripts/train.py
 ```
 
 The custom training script is optional and mainly provided for users who want to reproduce the exact experimental setup used in this work.
